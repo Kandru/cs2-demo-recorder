@@ -15,7 +15,8 @@ Configure the file DemoRecorder.json generated on addons/counterstrikesharp/conf
   "ServerId": 1,
   "DemosDir": "demos/",
   "Token": "your_web_app_token",
-  "UploadUrl": "http://example.com:2053/upload"
+  "UploadUrl": "http://example.com:2053/upload",
+  "EnableUpload": true
 }
 ```
 * MinOnline - 4: Minimum online requirement to start recording a demo.
@@ -23,6 +24,7 @@ Configure the file DemoRecorder.json generated on addons/counterstrikesharp/conf
 * DemosDir - "demos/": The folder for recording the demo on the server is created along the path addons/counterstrikesharp/data/
 * Token - "your_web_app_token": Your WEB token for uploading demo to the site.
 * UploadUrl - "http://example.com:2053/upload": Demo download handler address.
+* EnableUpload - Set to false to disable upload mechanism (demos will just be saved locally).
 
 ### Commands
 * css_dr_reload - Reload config DemoRecorder.json. Access @css/root
