@@ -34,6 +34,7 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private HookResult RecordEndHookResult(DynamicHook hook)
     {
+        if (!Config.EnableUpload) return HookResult.Continue;
         Task.Delay(1000).ContinueWith((task) =>
         {
             UploadDemo(g_sDemosDir + g_sDemosName, g_bState);
@@ -61,7 +62,9 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RegisterEventHandler<EventCsIntermission>(OnEventCsIntermissionPost);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
         RegisterListener<Listeners.OnMapEnd>(OnMapEndHandler);
-        UploadAllDemos();
+        
+        if (Config.EnableUpload)
+            UploadAllDemos();
     }
 
     public override void Unload (bool hotReload)
@@ -193,7 +196,7 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
             Logger.LogInformation(">> UploadDemo Exception: {ex}", ex);
         }
 
-        if(bUploadOld)
+        if(bUploadOld && Config.EnableUpload)
         {
             UploadAllDemos();
         }
