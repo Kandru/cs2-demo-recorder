@@ -30,9 +30,9 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     public bool g_bChangeMap, bOldState, g_bState;
 
-    public MemoryFunctionVoid<IntPtr, IntPtr> RecordEnd = new(g_Signature, g_BinaryPath);
+    //public MemoryFunctionVoid<IntPtr, IntPtr> RecordEnd = new(g_Signature, g_BinaryPath);
 
-    private HookResult RecordEndHookResult(DynamicHook hook)
+    /*private HookResult RecordEndHookResult(DynamicHook hook)
     {
         if (!Config.EnableUpload) return HookResult.Continue;
         Task.Delay(1000).ContinueWith((task) =>
@@ -40,7 +40,7 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
             UploadDemo(g_sDemosDir + g_sDemosName, g_bState);
         });
         return HookResult.Continue;
-    }
+    }*/
 
     public void OnConfigParsed(PluginConfig config)
     {
@@ -57,7 +57,7 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
         CreateDemoDir();
 
-        RecordEnd.Hook(RecordEndHookResult, HookMode.Post);
+        //RecordEnd.Hook(RecordEndHookResult, HookMode.Post);
 
         RegisterEventHandler<EventCsIntermission>(OnEventCsIntermissionPost);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
@@ -69,7 +69,7 @@ public class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     public override void Unload (bool hotReload)
     {
-        RecordEnd.Unhook(RecordEndHookResult, HookMode.Post);
+        //RecordEnd.Unhook(RecordEndHookResult, HookMode.Post);
     }
 
     [GameEventHandler(mode: HookMode.Post)]
