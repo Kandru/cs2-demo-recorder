@@ -17,6 +17,7 @@ public class DemoRecorder : BasePlugin
         Directory.CreateDirectory("csgo/addons/counterstrikesharp/data/demos");
         
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
+        RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
         RegisterListener<Listeners.OnMapStart>(OnMapStart);
     }
 
@@ -28,6 +29,12 @@ public class DemoRecorder : BasePlugin
         return HookResult.Continue;
     }
 
+    private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
+    {
+        Server.ExecuteCommand("tv_stoprecord");
+        return HookResult.Continue;
+    }
+    
     private void OnMapStart(string mapName)
     {
         _demoName = DateTime.Now.ToString("dd_MM_yyyy_HH_mm") + "-" + mapName + ".dem";
