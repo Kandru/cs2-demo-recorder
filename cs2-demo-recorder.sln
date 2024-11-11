@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoRecorder", "DemoRecorder.csproj", "{443A8F0A-9420-4736-888D-E679D1F7CE5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoRecorder", "src\DemoRecorder.csproj", "{443A8F0A-9420-4736-888D-E679D1F7CE5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

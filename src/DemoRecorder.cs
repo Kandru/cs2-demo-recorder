@@ -3,11 +3,10 @@ using CounterStrikeSharp.API.Core;
 
 namespace DemoRecorder;
     
-public class DemoRecorder : BasePlugin
+public partial class DemoRecorder : BasePlugin
 {
     public override string ModuleName => "Demo Recorder";
     public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it>";
-    public override string ModuleVersion => "1.0.0";
 
     private string? _demoName = null;
     
