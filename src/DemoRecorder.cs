@@ -6,36 +6,67 @@ namespace DemoRecorder;
 public partial class DemoRecorder : BasePlugin
 {
     public override string ModuleName => "Demo Recorder";
-    public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it>";
+    public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-    private string? _demoName = null;
+    private string _demoFolder = "addons/counterstrikesharp/data/demos";
+    private bool _isRecording = false;
     
     public override void Load(bool hotReload)
     {
+        // create directory for demos
         Directory.SetCurrentDirectory(Server.GameDirectory);
-        Directory.CreateDirectory("csgo/addons/counterstrikesharp/data/demos");
-        
+        Directory.CreateDirectory($"csgo/{_demoFolder}");
+        // register listener
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
-        RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        RegisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
+        RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+    }
+
+    public void Unload()
+    {
+        // stop recording
+        StopRecording();
     }
 
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        if (_demoName == null) return HookResult.Continue;
-        Server.ExecuteCommand($"tv_record \"addons/counterstrikesharp/data/demos/{_demoName}\"");
-        _demoName = null;
+        if (_isRecording) return HookResult.Continue;
+        StartRecording();
         return HookResult.Continue;
     }
 
     private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
     {
-        Server.ExecuteCommand("tv_stoprecord");
         return HookResult.Continue;
     }
-    
-    private void OnMapStart(string mapName)
+
+    private HookResult OnCsWinPanelMatch(EventCsWinPanelMatch @event, GameEventInfo info)
     {
-        _demoName = DateTime.Now.ToString("dd_MM_yyyy_HH_mm") + "-" + mapName + ".dem";
+        if (!_isRecording) return HookResult.Continue;
+        StopRecording();
+        return HookResult.Continue;
+    }
+
+    private HookResult OnCsMatchEndRestart(EventCsMatchEndRestart @event, GameEventInfo info)
+    {
+        if (!_isRecording) return HookResult.Continue;
+        StopRecording();
+        return HookResult.Continue;
+    }
+ 
+    private void StartRecording()
+    {
+        if ( _isRecording) return;
+        _isRecording = true;
+        string demoName = DateTime.Now.ToString("dd_MM_yyyy_HH_mm") + "-" + Server.MapName.ToLower() + ".dem";
+        Server.ExecuteCommand($"tv_record \"{_demoFolder}/{demoName}\"");
+    }
+
+    private void StopRecording()
+    {
+        if (!_isRecording) return;
+        _isRecording = false;
+        Server.ExecuteCommand("tv_stoprecord");
     }
 }
