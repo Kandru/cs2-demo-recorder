@@ -11,7 +11,7 @@ This tool automatically start a recording whenever someone is on your server.
 ## Installation
 
 1. Download and extract the latest release from the [GitHub releases page](https://github.com/Kandru/cs2-demo-recorder/releases/).
-2. Move the "Cosmetics" folder to the `/addons/counterstrikesharp/configs/plugins/` directory.
+2. Move the "DemoRecorder" folder to the `/addons/counterstrikesharp/configs/plugins/` directory.
 3. Restart the server.
 
 Updating is even easier: simply overwrite all plugin files and they will be reloaded automatically. To automate updates please use our [CS2 Update Manager](https://github.com/Kandru/cs2-update-manager/).
