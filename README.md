@@ -1,4 +1,4 @@
-# CounterstrikeSharp - Cosmetics
+# CounterstrikeSharp - Automatic SourceTV Demo Recorder
 
 [![UpdateManager Compatible](https://img.shields.io/badge/CS2-UpdateManager-darkgreen)](https://github.com/Kandru/cs2-update-manager/)
 [![GitHub release](https://img.shields.io/github/release/Kandru/cs2-demo-recorder?include_prereleases=&sort=semver&color=blue)](https://github.com/Kandru/cs2-demo-recorder/releases/)
