@@ -23,6 +23,8 @@ jobs:
   
     - name: Checkout Repository
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
 
     - name: Get Current Project Version Number From Version.cs
       id: get_version
@@ -72,14 +74,19 @@ jobs:
 
     - name: Compress Release
       if: env.new_version == 'true'
-      run: cd /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0 && zip -r /home/runner/work/${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip ${{ env.PLUGIN_NAME }}
+      run: cd /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0 && zip -r /home/runner/work/${{ env.REPOSITORY_NAME }}-release-${{ env.version }}.zip ${{ env.PLUGIN_NAME }}
 
     - name: Build Release Notes
       if: env.new_version == 'true'
       id: get_release_notes
       run: |
-        release_notes=$(git log --pretty=format:"[%h](https://github.com/${{ github.repository }}/commit/%H) - %s (%an)" $(git describe --tags --abbrev=0)..HEAD)
-        echo "release_notes=$release_notes" >> $GITHUB_ENV
+        if git describe --tags --abbrev=0 HEAD^ >/dev/null 2>&1; then
+          last_tag=$(git describe --tags --abbrev=0 HEAD^)
+        else
+          last_tag=$(git rev-list --max-parents=0 HEAD)
+        fi
+        release_notes=$(git log --pretty=format:"[%h](https://github.com/${{ github.repository }}/commit/%H) - %s (%an)" $last_tag..HEAD | sed '/^\s*$/d')
+        echo "$release_notes" > /home/runner/work/release_notes.md
 
     - name: Add Release on Github
       id: create_release
@@ -90,17 +97,17 @@ jobs:
       with:
         tag_name: ${{ env.version }}
         release_name: ${{ env.version }}
-        body: ${{ env.release_notes }}
+        body_path: /home/runner/work/release_notes.md
         draft: false
         prerelease: false
 
-    - name: Upload ${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
+    - name: Upload ${{ env.REPOSITORY_NAME }}-release-${{ env.version }}.zip
       if: env.new_version == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
-        asset_name: ${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
+        asset_path: /home/runner/work/${{ env.REPOSITORY_NAME }}-release-${{ env.version }}.zip
+        asset_name: ${{ env.REPOSITORY_NAME }}-release-${{ env.version }}.zip
         asset_content_type: application/zip
