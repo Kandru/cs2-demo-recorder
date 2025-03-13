@@ -10,6 +10,7 @@ public class PluginConfig : BasePluginConfig
 {
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
     [JsonPropertyName("transmit_hltv_entity")] public bool TransmitHLTV { get; set; } = false;
+    [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
 }
 
 public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
@@ -45,6 +46,9 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
         if (!Config.TransmitHLTV)
             RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
+        // set name of HLTV
+        if (Config.HLTVName != "")
+            Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");
         if (hotReload)
         {
             if (PlayersConnected())
