@@ -9,6 +9,7 @@ namespace DemoRecorder;
 public class PluginConfig : BasePluginConfig
 {
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+    [JsonPropertyName("transmit_hltv_entity")] public bool TransmitHLTV { get; set; } = false;
 }
 
 public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
@@ -42,6 +43,8 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
         RegisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        if (!Config.TransmitHLTV)
+            RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
         if (hotReload)
         {
             if (PlayersConnected())
@@ -62,6 +65,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         DeregisterEventHandler<EventCsIntermission>(OnCsIntermission);
         DeregisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         DeregisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        RemoveListener<Listeners.CheckTransmit>(EventCheckTransmit);
     }
 
     private HookResult CommandListener_Changelevel(CCSPlayerController? player, CommandInfo commandInfo)
@@ -115,6 +119,19 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     {
         StopRecording();
         return HookResult.Continue;
+    }
+
+    private void EventCheckTransmit(CCheckTransmitInfoList infoList)
+    {
+        // remove listener if no players to save resources
+        if (!Config.Enabled) return;
+        // worker
+        foreach ((CCheckTransmitInfo info, CCSPlayerController? player) in infoList)
+        {
+            if (player == null) continue;
+            foreach (var hltv in Utilities.GetPlayers().Where(player => player.IsHLTV))
+                info.TransmitEntities.Remove(hltv);
+        }
     }
 
     private bool PlayersConnected()
