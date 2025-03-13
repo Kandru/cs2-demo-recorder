@@ -103,7 +103,7 @@ public partial class DemoRecorder : BasePlugin
 
     private bool PlayersConnected()
     {
-        return Utilities.GetPlayers().Count(player => !player.IsBot) > 0;
+        return Utilities.GetPlayers().Count(player => !player.IsBot && !player.IsHLTV) > 0;
     }
 
     private void StartRecording()
