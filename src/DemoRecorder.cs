@@ -46,6 +46,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
         RegisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        RegisterListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
         if (!Config.TransmitHLTV)
             RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
         // set name of HLTV
@@ -71,6 +72,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         DeregisterEventHandler<EventCsIntermission>(OnCsIntermission);
         DeregisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         DeregisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        RemoveListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
         RemoveListener<Listeners.CheckTransmit>(EventCheckTransmit);
     }
 
@@ -130,6 +132,12 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     {
         StopRecording();
         return HookResult.Continue;
+    }
+
+    private void OnServerHibernationUpdate(bool isHibernating)
+    {
+        if (isHibernating)
+            StopRecording();
     }
 
     private void EventCheckTransmit(CCheckTransmitInfoList infoList)
