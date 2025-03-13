@@ -11,7 +11,7 @@ public class PluginConfig : BasePluginConfig
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
 }
 
-public partial class DemoRecorder : BasePlugin
+public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 {
     public override string ModuleName => "Demo Recorder";
     public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
@@ -25,7 +25,7 @@ public partial class DemoRecorder : BasePlugin
         Config = config;
         Config.Update();
         // create directory for demos
-        _demoFolder = Path.Combine(Path.GetDirectoryName(Config.GetConfigPath()) ?? "./demos/", "../../../data/demos/");
+        _demoFolder = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Config.GetConfigPath()) ?? "./demos/", "../../../data/demos/"));
         // create directory if not exists
         if (!Directory.Exists(_demoFolder))
             Directory.CreateDirectory(_demoFolder);
