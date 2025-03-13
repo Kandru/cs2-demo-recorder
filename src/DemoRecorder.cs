@@ -9,6 +9,7 @@ namespace DemoRecorder;
 public class PluginConfig : BasePluginConfig
 {
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+    [JsonPropertyName("changelevel_delay")] public float ChangelevelDelay { get; set; } = 3f;
     [JsonPropertyName("transmit_hltv_entity")] public bool TransmitHLTV { get; set; } = false;
     [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
 }
@@ -21,6 +22,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     public required PluginConfig Config { get; set; }
     private string _demoFolder = "";
     private bool _isRecording = false;
+    private bool _isChangelevel = false;
 
     public void OnConfigParsed(PluginConfig config)
     {
@@ -76,13 +78,18 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     {
         if (_isRecording && commandInfo.ArgCount >= 2)
         {
+            _isChangelevel = true;
             StopRecording();
             string command = commandInfo.GetArg(0);
             string map = commandInfo.GetArg(1);
-            AddTimer(3.0f, () => Server.ExecuteCommand($"{command} {map}"));
+            AddTimer(Config.ChangelevelDelay, () =>
+            {
+                // change level
+                Server.ExecuteCommand($"{command} {map}");
+                AddTimer(1f, () => _isChangelevel = false);
+            });
             return HookResult.Stop;
         }
-
         return HookResult.Continue;
     }
 
@@ -145,7 +152,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private void StartRecording()
     {
-        if (!Config.Enabled || _isRecording) return;
+        if (!Config.Enabled || _isRecording || _isChangelevel) return;
         _isRecording = true;
         string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower() + ".dem";
         Server.ExecuteCommand($"tv_enable 1");
