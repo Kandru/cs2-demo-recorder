@@ -1,22 +1,38 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Extensions;
+using System.Text.Json.Serialization;
 
 namespace DemoRecorder;
+
+public class PluginConfig : BasePluginConfig
+{
+    [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+}
 
 public partial class DemoRecorder : BasePlugin
 {
     public override string ModuleName => "Demo Recorder";
     public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-    private string _demoFolder = "addons/counterstrikesharp/data/demos";
+    public required PluginConfig Config { get; set; }
+    private string _demoFolder = "";
     private bool _isRecording = false;
+
+    public void OnConfigParsed(PluginConfig config)
+    {
+        Config = config;
+        Config.Update();
+        // create directory for demos
+        _demoFolder = Path.Combine(Path.GetDirectoryName(Config.GetConfigPath()) ?? "./demos/", "../../../data/demos/");
+        // create directory if not exists
+        if (!Directory.Exists(_demoFolder))
+            Directory.CreateDirectory(_demoFolder);
+    }
 
     public override void Load(bool hotReload)
     {
-        // create directory for demos
-        Directory.SetCurrentDirectory(Server.GameDirectory);
-        Directory.CreateDirectory($"csgo/{_demoFolder}");
         // register listener
         AddCommandListener("changelevel", CommandListener_Changelevel, HookMode.Pre);
         AddCommandListener("ds_workshop_changelevel", CommandListener_Changelevel, HookMode.Pre);
