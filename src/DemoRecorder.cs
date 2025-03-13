@@ -124,7 +124,7 @@ public partial class DemoRecorder : BasePlugin
 
     private void StartRecording()
     {
-        if (_isRecording) return;
+        if (!Config.Enabled || _isRecording) return;
         _isRecording = true;
         string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower() + ".dem";
         Server.ExecuteCommand($"tv_enable 1");
@@ -134,7 +134,7 @@ public partial class DemoRecorder : BasePlugin
 
     private void StopRecording()
     {
-        if (!_isRecording) return;
+        if (!Config.Enabled || !_isRecording) return;
         _isRecording = false;
         Server.ExecuteCommand("tv_stoprecord");
     }
