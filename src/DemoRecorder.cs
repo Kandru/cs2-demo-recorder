@@ -22,7 +22,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     public required PluginConfig Config { get; set; }
     private string _demoFolder = "";
     private bool _isRecording = false;
-    private bool _isRecordingForbidden = false;
+    private bool _isRecordingForbidden = true;
 
     public void OnConfigParsed(PluginConfig config)
     {
@@ -57,8 +57,15 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
             Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");
         if (hotReload)
         {
-            if (PlayersConnected())
-                StartRecording();
+            // check if it is during a round, not end match
+            if (GetGameRules()?.GamePhase <= 3)
+            {
+                // allow recording
+                _isRecordingForbidden = false;
+                // start recording if players are connected
+                if (PlayersConnected())
+                    StartRecording();
+            }
         }
     }
 
@@ -194,5 +201,10 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         if (!Config.Enabled || !_isRecording) return;
         _isRecording = false;
         Server.ExecuteCommand("tv_stoprecord");
+    }
+
+    private CCSGameRules? GetGameRules()
+    {
+        return Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules;
     }
 }
