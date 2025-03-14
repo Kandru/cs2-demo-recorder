@@ -11,6 +11,7 @@ public class PluginConfig : BasePluginConfig
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
     [JsonPropertyName("demo_folder")] public string DemoFolder { get; set; } = "";
     [JsonPropertyName("changelevel_delay")] public float ChangelevelDelay { get; set; } = 3f;
+    [JsonPropertyName("minimum_players_for_recording")] public int MinimumPlayers { get; set; } = 1;
     [JsonPropertyName("transmit_hltv_entity")] public bool TransmitHLTV { get; set; } = false;
     [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
 }
@@ -185,7 +186,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private bool PlayersConnected()
     {
-        return Utilities.GetPlayers().Count(player => !player.IsBot && !player.IsHLTV) > 0;
+        return Utilities.GetPlayers().Count(player => !player.IsBot && !player.IsHLTV) >= Config.MinimumPlayers;
     }
 
     private void StartRecording()
