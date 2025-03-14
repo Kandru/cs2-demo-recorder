@@ -30,7 +30,9 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         Config = config;
         // create directory for demos
         if (Config.DemoFolder == "")
-            Config.DemoFolder = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Server.GameDirectory) ?? "./", "game/csgo/addons/counterstrikesharp/data/demos/"));
+            Config.DemoFolder = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(Server.GameDirectory) ?? "./",
+                "game/csgo/addons/counterstrikesharp/data/demos/"));
         // update config file with latest plugin changes
         Config.Update();
         // create demo directory if not exists
@@ -94,13 +96,16 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private HookResult CommandListener_Changelevel(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        // intercept if recording is active and changelevel is called
         if (_isRecording && commandInfo.ArgCount >= 2)
         {
             _isRecordingForbidden = true;
             StopRecording();
             string command = commandInfo.GetArg(0);
             string map = commandInfo.GetArg(1);
+            // delay changelevel
             AddTimer(Config.ChangelevelDelay, () => Server.ExecuteCommand($"{command} {map}"));
+            // stop further event execution
             return HookResult.Stop;
         }
         return HookResult.Continue;
@@ -173,12 +178,16 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private void EventCheckTransmit(CCheckTransmitInfoList infoList)
     {
-        // remove listener if no players to save resources
+        // remove listener if disabled to save resources
         if (!Config.Enabled) return;
         // worker
         foreach ((CCheckTransmitInfo info, CCSPlayerController? player) in infoList)
         {
-            if (player == null) continue;
+            if (player == null
+                || !player.IsValid
+                || player.IsBot
+                || player.IsHLTV) continue;
+            // iterate through all players and remove HLTV from transmit list
             foreach (var hltv in Utilities.GetPlayers().Where(player => player.IsHLTV))
                 info.TransmitEntities.Remove(hltv);
         }
