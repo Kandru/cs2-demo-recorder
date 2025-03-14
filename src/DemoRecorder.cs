@@ -22,7 +22,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     public required PluginConfig Config { get; set; }
     private string _demoFolder = "";
     private bool _isRecording = false;
-    private bool _isChangelevel = false;
+    private bool _isRecordingForbidden = false;
 
     public void OnConfigParsed(PluginConfig config)
     {
@@ -46,6 +46,8 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
         RegisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
         RegisterListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
         if (!Config.TransmitHLTV)
             RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
@@ -72,6 +74,8 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         DeregisterEventHandler<EventCsIntermission>(OnCsIntermission);
         DeregisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
         DeregisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
+        RemoveListener<Listeners.OnMapStart>(OnMapStart);
+        RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
         RemoveListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
         RemoveListener<Listeners.CheckTransmit>(EventCheckTransmit);
     }
@@ -80,16 +84,11 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     {
         if (_isRecording && commandInfo.ArgCount >= 2)
         {
-            _isChangelevel = true;
+            _isRecordingForbidden = true;
             StopRecording();
             string command = commandInfo.GetArg(0);
             string map = commandInfo.GetArg(1);
-            AddTimer(Config.ChangelevelDelay, () =>
-            {
-                // change level
-                Server.ExecuteCommand($"{command} {map}");
-                AddTimer(1f, () => _isChangelevel = false);
-            });
+            AddTimer(Config.ChangelevelDelay, () => Server.ExecuteCommand($"{command} {map}"));
             return HookResult.Stop;
         }
         return HookResult.Continue;
@@ -97,6 +96,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
+        _isRecordingForbidden = false;
         if (PlayersConnected())
             StartRecording();
         return HookResult.Continue;
@@ -117,27 +117,46 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
     {
+        _isRecordingForbidden = true;
         StopRecording();
         return HookResult.Continue;
     }
 
     private HookResult OnCsWinPanelMatch(EventCsWinPanelMatch @event, GameEventInfo info)
     {
-
+        _isRecordingForbidden = true;
         StopRecording();
         return HookResult.Continue;
     }
 
     private HookResult OnCsMatchEndRestart(EventCsMatchEndRestart @event, GameEventInfo info)
     {
+        _isRecordingForbidden = true;
         StopRecording();
         return HookResult.Continue;
+    }
+
+    private void OnMapStart(string mapName)
+    {
+        _isRecordingForbidden = false;
+    }
+
+    private void OnMapEnd()
+    {
+        _isRecordingForbidden = true;
     }
 
     private void OnServerHibernationUpdate(bool isHibernating)
     {
         if (isHibernating)
+        {
+            _isRecordingForbidden = true;
             StopRecording();
+        }
+        else
+        {
+            _isRecordingForbidden = false;
+        }
     }
 
     private void EventCheckTransmit(CCheckTransmitInfoList infoList)
@@ -160,7 +179,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private void StartRecording()
     {
-        if (!Config.Enabled || _isRecording || _isChangelevel) return;
+        if (!Config.Enabled || _isRecording || _isRecordingForbidden) return;
         _isRecording = true;
         string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower() + ".dem";
         Server.ExecuteCommand($"tv_enable 1");
