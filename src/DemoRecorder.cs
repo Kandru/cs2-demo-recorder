@@ -9,6 +9,7 @@ namespace DemoRecorder;
 public class PluginConfig : BasePluginConfig
 {
     [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+    [JsonPropertyName("demo_folder")] public string DemoFolder { get; set; } = "";
     [JsonPropertyName("changelevel_delay")] public float ChangelevelDelay { get; set; } = 3f;
     [JsonPropertyName("transmit_hltv_entity")] public bool TransmitHLTV { get; set; } = false;
     [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
@@ -20,19 +21,20 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
     public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
     public required PluginConfig Config { get; set; }
-    private string _demoFolder = "";
     private bool _isRecording = false;
     private bool _isRecordingForbidden = true;
 
     public void OnConfigParsed(PluginConfig config)
     {
         Config = config;
-        Config.Update();
         // create directory for demos
-        _demoFolder = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Config.GetConfigPath()) ?? "./demos/", "../../../data/demos/"));
-        // create directory if not exists
-        if (!Directory.Exists(_demoFolder))
-            Directory.CreateDirectory(_demoFolder);
+        if (Config.DemoFolder == "")
+            Config.DemoFolder = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Server.GameDirectory) ?? "./", "game/csgo/addons/counterstrikesharp/data/demos/"));
+        // update config file with latest plugin changes
+        Config.Update();
+        // create demo directory if not exists
+        if (!Directory.Exists(Config.DemoFolder))
+            Directory.CreateDirectory(Config.DemoFolder);
     }
 
     public override void Load(bool hotReload)
@@ -193,7 +195,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower() + ".dem";
         Server.ExecuteCommand($"tv_enable 1");
         Server.ExecuteCommand($"tv_record_immediate 1");
-        Server.ExecuteCommand($"tv_record \"{_demoFolder}/{demoName}\"");
+        Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\"");
     }
 
     private void StopRecording()
