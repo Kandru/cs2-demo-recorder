@@ -155,6 +155,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private void OnMapStart(string mapName)
     {
+        Config.Reload();
         _isRecordingForbidden = false;
     }
 
