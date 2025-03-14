@@ -2,5 +2,5 @@ namespace DemoRecorder;
 
 public partial class DemoRecorder
 {
-    public override string ModuleVersion => "1.0.9";
+    public override string ModuleVersion => "1.0.10";
 }
