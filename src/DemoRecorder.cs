@@ -46,6 +46,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         AddCommandListener("changelevel", CommandListener_Changelevel, HookMode.Pre);
         AddCommandListener("ds_workshop_changelevel", CommandListener_Changelevel, HookMode.Pre);
         AddCommandListener("map", CommandListener_Changelevel, HookMode.Pre);
+        AddCommandListener("host_workshop_map", CommandListener_Changelevel, HookMode.Pre);
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
@@ -82,6 +83,7 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
         RemoveCommandListener("changelevel", CommandListener_Changelevel, HookMode.Pre);
         RemoveCommandListener("ds_workshop_changelevel", CommandListener_Changelevel, HookMode.Pre);
         RemoveCommandListener("map", CommandListener_Changelevel, HookMode.Pre);
+        RemoveCommandListener("host_workshop_map", CommandListener_Changelevel, HookMode.Pre);
         DeregisterEventHandler<EventRoundStart>(OnRoundStart);
         DeregisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
         DeregisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
