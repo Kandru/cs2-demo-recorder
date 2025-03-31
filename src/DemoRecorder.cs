@@ -123,7 +123,8 @@ public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
-        StartRecording();
+        if (PlayersConnected())
+            StartRecording();
         return HookResult.Continue;
     }
 
