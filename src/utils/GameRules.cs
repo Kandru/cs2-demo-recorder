@@ -22,14 +22,14 @@ namespace DemoRecorder.Utils
 
         public static object? Get(string rule)
         {
-            GetGameRule();
+            _ = GetGameRule();
             System.Reflection.PropertyInfo? property = _gameRules?.GetType().GetProperty(rule);
             return property?.CanRead == true ? property.GetValue(_gameRules) : null;
         }
 
         public static void SetRoundTime(float minutes)
         {
-            GetGameRule();
+            _ = GetGameRule();
             if (_gameRules != null)
             {
                 _gameRules.RoundTime = (int)Math.Round(minutes * 60);
@@ -38,7 +38,7 @@ namespace DemoRecorder.Utils
 
         public static void TerminateRound(RoundEndReason reason, float delay = 0f)
         {
-            GetGameRule();
+            _ = GetGameRule();
             if (_gameRules != null)
             {
                 _gameRules.RoundsPlayedThisPhase = 1;
