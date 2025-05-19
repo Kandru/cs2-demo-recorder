@@ -35,6 +35,7 @@ This plugin automatically creates a readable JSON configuration file. This confi
   "demo_folder": "",
   "changelevel_delay": 3,
   "minimum_players_for_recording": 1,
+  "disable_recording_during_warmup": false,
   "transmit_hltv_entity": false,
   "hltv_name": "visit Counterstrike.Party",
   "ConfigVersion": 1
@@ -54,6 +55,14 @@ Folder where to save recorded demos to. A default absolute path will be generate
 ### changelevel_delay
 
 Minimum delay before map will be changed when using a map-change command. Should be at least one second to allow SourceTV to stop recording properly.
+
+### minimum_players_for_recording
+
+Minimum players necessary to start recording.
+
+### disable_recording_during_warmup
+
+Whether or not to disable recording during warmup period.
 
 ### transmit_hltv_entity
 
