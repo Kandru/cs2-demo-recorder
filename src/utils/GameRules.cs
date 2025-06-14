@@ -12,11 +12,8 @@ namespace DemoRecorder.Utils
 
         private static CCSGameRules? GetGameRule()
         {
-            if (_gameRules == null)
-            {
-                _gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
+            _gameRules ??= Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules")
                     .FirstOrDefault(static e => e != null && e.IsValid)?.GameRules;
-            }
             return _gameRules;
         }
 
