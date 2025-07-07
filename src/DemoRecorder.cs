@@ -114,8 +114,6 @@ namespace DemoRecorder
         {
             if (!EnoughPlayersConnected())
             {
-                EnableHLTV();
-                SetHLTVName();
                 StopRecording();
             }
 
@@ -154,6 +152,7 @@ namespace DemoRecorder
         private void OnMapEnd()
         {
             _isRecordingForbidden = true;
+            DisableHLTV();
         }
 
         private void OnServerHibernationUpdate(bool isHibernating)
@@ -205,11 +204,6 @@ namespace DemoRecorder
                 || !(bool)GameRules.Get("WarmupPeriod")!;
         }
 
-        private static void EnableHLTV()
-        {
-            Server.ExecuteCommand($"tv_enable 1");
-        }
-
         private void StartRecording()
         {
             if (!Config.Enabled || _isRecording || _isRecordingForbidden)
@@ -233,6 +227,17 @@ namespace DemoRecorder
 
             _isRecording = false;
             Server.ExecuteCommand("tv_stoprecord");
+            DisableHLTV();
+        }
+
+        private static void EnableHLTV()
+        {
+            Server.ExecuteCommand($"tv_enable true");
+        }
+
+        private static void DisableHLTV()
+        {
+            Server.ExecuteCommand($"tv_enable false");
         }
 
         private void SetHLTVName()
