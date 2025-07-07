@@ -73,12 +73,7 @@ namespace DemoRecorder
             {
                 RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
             }
-            // set name of HLTV
-            if (Config.HLTVName != "")
-            {
-                Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");
-            }
-
+            SetHLTVName();
             if (hotReload)
             {
                 // check if it is during a round, not end match
@@ -138,6 +133,7 @@ namespace DemoRecorder
             _isRecordingForbidden = false;
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
+                SetHLTVName();
                 StartRecording();
             }
 
@@ -148,6 +144,7 @@ namespace DemoRecorder
         {
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
+                SetHLTVName();
                 StartRecording();
             }
 
@@ -158,6 +155,7 @@ namespace DemoRecorder
         {
             if (!EnoughPlayersConnected())
             {
+                SetHLTVName();
                 StopRecording();
             }
 
@@ -189,6 +187,7 @@ namespace DemoRecorder
         {
             Config.Reload();
             _isRecordingForbidden = false;
+            SetHLTVName();
         }
 
         private void OnMapEnd()
@@ -268,6 +267,14 @@ namespace DemoRecorder
 
             _isRecording = false;
             Server.ExecuteCommand("tv_stoprecord");
+        }
+
+        private void SetHLTVName()
+        {
+            if (Config.HLTVName != "")
+            {
+                Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");
+            }
         }
     }
 }
