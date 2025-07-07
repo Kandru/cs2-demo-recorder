@@ -34,7 +34,7 @@ namespace DemoRecorder
             {
                 RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
             }
-            SetHLTVName();
+
             if (hotReload)
             {
                 // check if it is during a round, not end match
@@ -45,6 +45,8 @@ namespace DemoRecorder
                     // start recording if players are connected
                     if (EnoughPlayersConnected() && CheckForWarmup())
                     {
+                        EnableHLTV();
+                        SetHLTVName();
                         StartRecording();
                     }
                 }
@@ -94,6 +96,7 @@ namespace DemoRecorder
             _isRecordingForbidden = false;
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
+                EnableHLTV();
                 SetHLTVName();
                 StartRecording();
             }
@@ -105,6 +108,7 @@ namespace DemoRecorder
         {
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
+                EnableHLTV();
                 SetHLTVName();
                 StartRecording();
             }
@@ -116,6 +120,7 @@ namespace DemoRecorder
         {
             if (!EnoughPlayersConnected())
             {
+                EnableHLTV();
                 SetHLTVName();
                 StopRecording();
             }
@@ -148,6 +153,7 @@ namespace DemoRecorder
         {
             Config.Reload();
             _isRecordingForbidden = false;
+            EnableHLTV();
             SetHLTVName();
         }
 
@@ -205,6 +211,11 @@ namespace DemoRecorder
                 || !(bool)GameRules.Get("WarmupPeriod")!;
         }
 
+        private void EnableHLTV()
+        {
+            Server.ExecuteCommand($"tv_enable 1");
+        }
+
         private void StartRecording()
         {
             if (!Config.Enabled || _isRecording || _isRecordingForbidden)
@@ -214,7 +225,6 @@ namespace DemoRecorder
 
             _isRecording = true;
             string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
-            Server.ExecuteCommand($"tv_enable 1");
             Server.ExecuteCommand($"tv_record_immediate 1");
             Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\"");
         }
