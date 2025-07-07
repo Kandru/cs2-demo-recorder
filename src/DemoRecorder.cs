@@ -45,8 +45,6 @@ namespace DemoRecorder
                     // start recording if players are connected
                     if (EnoughPlayersConnected() && CheckForWarmup())
                     {
-                        EnableHLTV();
-                        SetHLTVName();
                         StartRecording();
                     }
                 }
@@ -96,8 +94,6 @@ namespace DemoRecorder
             _isRecordingForbidden = false;
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
-                EnableHLTV();
-                SetHLTVName();
                 StartRecording();
             }
 
@@ -108,8 +104,6 @@ namespace DemoRecorder
         {
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
-                EnableHLTV();
-                SetHLTVName();
                 StartRecording();
             }
 
@@ -211,7 +205,7 @@ namespace DemoRecorder
                 || !(bool)GameRules.Get("WarmupPeriod")!;
         }
 
-        private void EnableHLTV()
+        private static void EnableHLTV()
         {
             Server.ExecuteCommand($"tv_enable 1");
         }
@@ -222,8 +216,9 @@ namespace DemoRecorder
             {
                 return;
             }
-
             _isRecording = true;
+            EnableHLTV();
+            SetHLTVName();
             string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
             Server.ExecuteCommand($"tv_record_immediate 1");
             Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\"");
