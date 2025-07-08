@@ -72,6 +72,20 @@ An experimental feature to not send the HLTV entity to players to avoid detectio
 
 Change the name of the SourceTV. Simply changes "tv_name".
 
+## Commands
+
+### demorecorder reload (server console only)
+
+Reloads the plug-in configuration.
+
+### demorecorder enable (server console only)
+
+Enables the plug-in and saves this state to the configuration.
+
+### demorecorder disable (server console only)
+
+Disables the plug-in and saves this state to the configuration.
+
 ## Compile Yourself
 
 Clone the project:

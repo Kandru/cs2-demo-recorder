@@ -2,5 +2,9 @@
     "core.debugprint": "[DemoRecorder][DEBUG]: {message}",
     "core.config": "[DemoRecorder] Configuration loaded!",
     "core.init": "[DemoRecorder] Initializing...",
-    "core.shutdown": "[DemoRecorder] Shutting down..."
+    "core.shutdown": "[DemoRecorder] Shutting down...",
+    "admin.unknown_command": "[LoadoutKeeper] Unknown command: {command}",
+    "admin.reload": "[LoadoutKeeper] Configuration reloaded",
+    "admin.enabled": "[LoadoutKeeper] LoadoutKeeper is now enabled",
+    "admin.disabled": "[LoadoutKeeper] LoadoutKeeper is now disabled"
 }
