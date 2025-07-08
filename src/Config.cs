@@ -8,6 +8,8 @@ namespace DemoRecorder
     {
         // enable plugin
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        // debug mode
+        [JsonPropertyName("debug")] public bool Debug { get; set; } = false;
         // folder for demo files
         [JsonPropertyName("demo_folder")] public string DemoFolder { get; set; } = "";
         // delay before changelevel to allow recording to stop properly without crash
@@ -22,7 +24,7 @@ namespace DemoRecorder
         [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
     }
 
-    public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
+    public partial class DemoRecorder : IPluginConfig<PluginConfig>
     {
         public required PluginConfig Config { get; set; }
 
@@ -41,6 +43,7 @@ namespace DemoRecorder
             {
                 _ = Directory.CreateDirectory(Config.DemoFolder);
             }
+            Console.WriteLine(Localizer["core.config"]);
         }
     }
 }

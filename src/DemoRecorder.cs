@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
@@ -6,7 +7,7 @@ using DemoRecorder.Utils;
 
 namespace DemoRecorder
 {
-    public partial class DemoRecorder : BasePlugin, IPluginConfig<PluginConfig>
+    public partial class DemoRecorder : BasePlugin
     {
         public override string ModuleName => "Demo Recorder";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
@@ -16,6 +17,7 @@ namespace DemoRecorder
 
         public override void Load(bool hotReload)
         {
+            Console.WriteLine(Localizer["core.init"]);
             // register listener
             AddCommandListener("changelevel", CommandListener_Changelevel, HookMode.Pre);
             AddCommandListener("ds_workshop_changelevel", CommandListener_Changelevel, HookMode.Pre);
@@ -53,6 +55,7 @@ namespace DemoRecorder
 
         public void Unload()
         {
+            Console.WriteLine(Localizer["core.shutdown"]);
             // stop recording
             StopRecording();
             // deregister listener
@@ -77,6 +80,7 @@ namespace DemoRecorder
             // intercept if recording is active and changelevel is called
             if (_isRecording && commandInfo.ArgCount >= 2)
             {
+                DebugPrint($"Intercepted changelevel command: {commandInfo.GetArg(0)} {commandInfo.GetArg(1)}");
                 _isRecordingForbidden = true;
                 StopRecording();
                 string command = commandInfo.GetArg(0);
@@ -91,6 +95,7 @@ namespace DemoRecorder
 
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
+            DebugPrint("Round started");
             _isRecordingForbidden = false;
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
@@ -101,6 +106,7 @@ namespace DemoRecorder
 
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
+            DebugPrint($"Player connected");
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
                 StartRecording();
@@ -111,6 +117,7 @@ namespace DemoRecorder
 
         private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
+            DebugPrint($"Player disconnected");
             if (!EnoughPlayersConnected())
             {
                 StopRecording();
@@ -121,6 +128,7 @@ namespace DemoRecorder
 
         private HookResult OnCsWinPanelMatch(EventCsWinPanelMatch @event, GameEventInfo info)
         {
+            DebugPrint("Match ended");
             _isRecordingForbidden = true;
             StopRecording();
             return HookResult.Continue;
@@ -128,6 +136,7 @@ namespace DemoRecorder
 
         private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
         {
+            DebugPrint("New match started");
             _isRecordingForbidden = false;
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
@@ -138,12 +147,14 @@ namespace DemoRecorder
 
         private HookResult OnCsMatchEndRestart(EventCsMatchEndRestart @event, GameEventInfo info)
         {
+            DebugPrint("Match end restart");
             _isRecordingForbidden = true;
             return HookResult.Continue;
         }
 
         private void OnMapStart(string mapName)
         {
+            DebugPrint($"Map started: {mapName}");
             Config.Reload();
             _isRecordingForbidden = false;
             EnableHLTV();
@@ -152,12 +163,14 @@ namespace DemoRecorder
 
         private void OnMapEnd()
         {
+            DebugPrint("Map ended");
             _isRecordingForbidden = true;
             DisableHLTV();
         }
 
         private void OnServerHibernationUpdate(bool isHibernating)
         {
+            DebugPrint($"Server hibernation update: Hibernation {(isHibernating ? "started" : "ended")}");
             if (isHibernating)
             {
                 _isRecordingForbidden = true;
@@ -196,49 +209,61 @@ namespace DemoRecorder
 
         private bool EnoughPlayersConnected()
         {
-            return Utilities.GetPlayers().Count(static player => !player.IsBot && !player.IsHLTV) >= Config.MinimumPlayers;
+            int playerCount = Utilities.GetPlayers().Count(static player => !player.IsBot && !player.IsHLTV);
+            DebugPrint($"Checking whether player-threshold is matched: {playerCount} >= {Config.MinimumPlayers} ({playerCount >= Config.MinimumPlayers})");
+            return playerCount >= Config.MinimumPlayers;
         }
 
         private bool CheckForWarmup()
         {
+            DebugPrint("Checking for warmup period: disabled during warmup: " + (Config.DisableRecordingDuringWarmup ? "yes" : "no") + ", warmup period active: " + ((bool)GameRules.Get("WarmupPeriod")! ? "yes" : "no"));
             return !Config.DisableRecordingDuringWarmup
                 || !(bool)GameRules.Get("WarmupPeriod")!;
         }
 
         private void StartRecording()
         {
+            DebugPrint("Starting recording");
             if (!Config.Enabled || _isRecording || _isRecordingForbidden)
             {
+                DebugPrint("Recording is already active or forbidden, not starting a new recording.");
                 return;
             }
             _isRecording = true;
             string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
             Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1");
+            DebugPrint($"Recording started: {demoName}");
         }
 
         private void StopRecording()
         {
+            DebugPrint("Stopping recording");
             if (!Config.Enabled || !_isRecording)
             {
+                DebugPrint("Recording is not active, nothing to stop.");
                 return;
             }
             _isRecording = false;
             Server.ExecuteCommand("tv_stoprecord -instance 1");
+            DebugPrint("Recording stopped");
         }
 
-        private static void EnableHLTV()
+        private void EnableHLTV()
         {
+            DebugPrint("Enabling HLTV");
             Server.ExecuteCommand($"tv_enable true");
             Server.ExecuteCommand($"tv_record_immediate 1");
         }
 
-        private static void DisableHLTV()
+        private void DisableHLTV()
         {
+            DebugPrint("Disabling HLTV");
             Server.ExecuteCommand($"tv_enable false");
         }
 
         private void SetHLTVName()
         {
+            DebugPrint("Setting HLTV name");
             if (Config.HLTVName != "")
             {
                 Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");

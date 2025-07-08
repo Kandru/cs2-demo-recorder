@@ -1,0 +1,6 @@
+{
+    "core.debugprint": "[DemoRecorder][DEBUG]: {message}",
+    "core.config": "[DemoRecorder] Konfiguration geladen!",
+    "core.init": "[DemoRecorder] wird initialisiert...",
+    "core.shutdown": "[DemoRecorder] wird gestoppt..."
+}
