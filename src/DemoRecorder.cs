@@ -11,7 +11,7 @@ namespace DemoRecorder
         public override string ModuleName => "Demo Recorder";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-        private bool _isRecording;
+        private bool _isRecording = false;
         private bool _isRecordingForbidden = true;
 
         public override void Load(bool hotReload)
@@ -24,8 +24,8 @@ namespace DemoRecorder
             RegisterEventHandler<EventRoundStart>(OnRoundStart);
             RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
             RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
-            RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
             RegisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
+            RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
             RegisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
             RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
@@ -63,8 +63,8 @@ namespace DemoRecorder
             DeregisterEventHandler<EventRoundStart>(OnRoundStart);
             DeregisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
             DeregisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
-            DeregisterEventHandler<EventCsIntermission>(OnCsIntermission);
             DeregisterEventHandler<EventCsWinPanelMatch>(OnCsWinPanelMatch);
+            DeregisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
             DeregisterEventHandler<EventCsMatchEndRestart>(OnCsMatchEndRestart);
             RemoveListener<Listeners.OnMapStart>(OnMapStart);
             RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
@@ -96,7 +96,6 @@ namespace DemoRecorder
             {
                 StartRecording();
             }
-
             return HookResult.Continue;
         }
 
@@ -120,13 +119,6 @@ namespace DemoRecorder
             return HookResult.Continue;
         }
 
-        private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
-        {
-            _isRecordingForbidden = true;
-            StopRecording();
-            return HookResult.Continue;
-        }
-
         private HookResult OnCsWinPanelMatch(EventCsWinPanelMatch @event, GameEventInfo info)
         {
             _isRecordingForbidden = true;
@@ -134,10 +126,19 @@ namespace DemoRecorder
             return HookResult.Continue;
         }
 
+        private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
+        {
+            _isRecordingForbidden = false;
+            if (EnoughPlayersConnected() && CheckForWarmup())
+            {
+                StartRecording();
+            }
+            return HookResult.Continue;
+        }
+
         private HookResult OnCsMatchEndRestart(EventCsMatchEndRestart @event, GameEventInfo info)
         {
             _isRecordingForbidden = true;
-            StopRecording();
             return HookResult.Continue;
         }
 
@@ -211,11 +212,8 @@ namespace DemoRecorder
                 return;
             }
             _isRecording = true;
-            EnableHLTV();
-            SetHLTVName();
             string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
-            Server.ExecuteCommand($"tv_record_immediate 1");
-            Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\"");
+            Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1");
         }
 
         private void StopRecording()
@@ -224,15 +222,14 @@ namespace DemoRecorder
             {
                 return;
             }
-
             _isRecording = false;
-            Server.ExecuteCommand("tv_stoprecord");
-            DisableHLTV();
+            Server.ExecuteCommand("tv_stoprecord -instance 1");
         }
 
         private static void EnableHLTV()
         {
             Server.ExecuteCommand($"tv_enable true");
+            Server.ExecuteCommand($"tv_record_immediate 1");
         }
 
         private static void DisableHLTV()
