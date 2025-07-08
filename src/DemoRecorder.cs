@@ -11,7 +11,7 @@ namespace DemoRecorder
         public override string ModuleName => "Demo Recorder";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-        private bool _isRecording = false;
+        private bool _isRecording;
         private bool _isRecordingForbidden = true;
 
         public override void Load(bool hotReload)
