@@ -106,23 +106,27 @@ namespace DemoRecorder
 
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
-            DebugPrint($"Player connected");
-            if (EnoughPlayersConnected() && CheckForWarmup())
+            Server.NextFrame(() =>
             {
-                StartRecording();
-            }
-
+                DebugPrint($"Player connected");
+                if (EnoughPlayersConnected() && CheckForWarmup())
+                {
+                    StartRecording();
+                }
+            });
             return HookResult.Continue;
         }
 
         private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
-            DebugPrint($"Player disconnected");
-            if (!EnoughPlayersConnected())
+            Server.NextFrame(() =>
             {
-                StopRecording();
-            }
-
+                DebugPrint($"Player disconnected");
+                if (!EnoughPlayersConnected())
+                {
+                    StopRecording();
+                }
+            });
             return HookResult.Continue;
         }
 
