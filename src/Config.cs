@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Extensions;
 using System.Text.Json.Serialization;
@@ -34,7 +35,7 @@ namespace DemoRecorder
             // create directory for demos
             if (Config.DemoFolder == "")
             {
-                Config.DemoFolder = "./addons/counterstrikesharp/data/demos/";
+                Config.DemoFolder = Server.GameDirectory + "/csgo/addons/counterstrikesharp/data/demos/";
             }
             // update config file with latest plugin changes
             Config.Update();
