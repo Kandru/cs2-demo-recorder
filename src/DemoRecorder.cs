@@ -234,7 +234,7 @@ namespace DemoRecorder
             }
             _isRecording = true;
             string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
-            Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1");
+            Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1".Replace("//", "/"));
             DebugPrint($"Recording started: {demoName}");
         }
 
