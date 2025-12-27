@@ -31,10 +31,6 @@ namespace DemoRecorder
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
             RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
             RegisterListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
-            if (!Config.TransmitHLTV)
-            {
-                RegisterListener<Listeners.CheckTransmit>(EventCheckTransmit);
-            }
 
             if (hotReload)
             {
@@ -71,7 +67,6 @@ namespace DemoRecorder
             RemoveListener<Listeners.OnMapStart>(OnMapStart);
             RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
             RemoveListener<Listeners.OnServerHibernationUpdate>(OnServerHibernationUpdate);
-            RemoveListener<Listeners.CheckTransmit>(EventCheckTransmit);
         }
 
         private HookResult CommandListener_Changelevel(CCSPlayerController? player, CommandInfo commandInfo)
@@ -105,9 +100,17 @@ namespace DemoRecorder
 
         private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
         {
+            CCSPlayerController? player = @event.Userid;
+            if (player == null
+                || player.IsBot
+                || player.IsHLTV)
+            {
+                return HookResult.Continue;
+            }
+            DebugPrint($"Player {player.PlayerName} connected");
+            // delay a frame to not interfere with connection state of player
             Server.NextFrame(() =>
             {
-                DebugPrint($"Player connected");
                 if (EnoughPlayersConnected() && CheckForWarmup())
                 {
                     StartRecording();
@@ -118,9 +121,17 @@ namespace DemoRecorder
 
         private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
+            CCSPlayerController? player = @event.Userid;
+            if (player == null
+                || player.IsBot
+                || player.IsHLTV)
+            {
+                return HookResult.Continue;
+            }
+            DebugPrint($"Player {player.PlayerName} disconnected");
+            // delay a frame to not interfere with connection state of player
             Server.NextFrame(() =>
             {
-                DebugPrint($"Player disconnected");
                 if (!EnoughPlayersConnected())
                 {
                     StopRecording();
@@ -182,31 +193,6 @@ namespace DemoRecorder
             else
             {
                 _isRecordingForbidden = false;
-            }
-        }
-
-        private void EventCheckTransmit(CCheckTransmitInfoList infoList)
-        {
-            // remove listener if disabled to save resources
-            if (!Config.Enabled)
-            {
-                return;
-            }
-            // worker
-            foreach ((CCheckTransmitInfo info, CCSPlayerController? player) in infoList)
-            {
-                if (player == null
-                    || !player.IsValid
-                    || player.IsBot
-                    || player.IsHLTV)
-                {
-                    continue;
-                }
-                // iterate through all players and remove HLTV from transmit list
-                foreach (CCSPlayerController? hltv in Utilities.GetPlayers().Where(static player => player.IsHLTV))
-                {
-                    info.TransmitEntities.Remove(hltv);
-                }
             }
         }
 
