@@ -19,8 +19,6 @@ namespace DemoRecorder
         [JsonPropertyName("minimum_players_for_recording")] public int MinimumPlayers { get; set; } = 1;
         // whether or not to start recording during warmup
         [JsonPropertyName("disable_recording_during_warmup")] public bool DisableRecordingDuringWarmup { get; set; } = false;
-        // name of the hltv
-        [JsonPropertyName("hltv_name")] public string HLTVName { get; set; } = "visit Counterstrike.Party";
     }
 
     public partial class DemoRecorder : IPluginConfig<PluginConfig>

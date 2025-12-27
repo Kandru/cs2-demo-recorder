@@ -172,7 +172,6 @@ namespace DemoRecorder
             Config.Reload();
             _isRecordingForbidden = false;
             EnableHLTV();
-            SetHLTVName();
         }
 
         private void OnMapEnd()
@@ -248,15 +247,6 @@ namespace DemoRecorder
         {
             DebugPrint("Disabling HLTV");
             Server.ExecuteCommand($"tv_enable false");
-        }
-
-        private void SetHLTVName()
-        {
-            DebugPrint("Setting HLTV name");
-            if (Config.HLTVName != "")
-            {
-                Server.ExecuteCommand($"tv_name \"{Config.HLTVName}\"");
-            }
         }
     }
 }
