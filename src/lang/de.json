@@ -3,8 +3,8 @@
     "core.config": "[DemoRecorder] Konfiguration geladen!",
     "core.init": "[DemoRecorder] wird initialisiert...",
     "core.shutdown": "[DemoRecorder] wird gestoppt...",
-    "admin.unknown_command": "[LoadoutKeeper] Unbekannter Befehl: {command}",
-    "admin.reload": "[LoadoutKeeper] Konfiguration neu geladen",
-    "admin.enabled": "[LoadoutKeeper] LoadoutKeeper ist jetzt aktiviert",
-    "admin.disabled": "[LoadoutKeeper] LoadoutKeeper ist jetzt deaktiviert"
+    "admin.unknown_command": "[DemoRecorder] Unbekannter Befehl: {command}",
+    "admin.reload": "[DemoRecorder] Konfiguration neu geladen",
+    "admin.enabled": "[DemoRecorder] DemoRecorder ist jetzt aktiviert",
+    "admin.disabled": "[DemoRecorder] DemoRecorder ist jetzt deaktiviert"
 }
