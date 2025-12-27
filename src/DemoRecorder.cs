@@ -39,7 +39,7 @@ namespace DemoRecorder
                 {
                     // allow recording
                     _isRecordingForbidden = false;
-                    // start recording if players are connected
+                    // check if we should start recording
                     if (EnoughPlayersConnected() && CheckForWarmup())
                     {
                         StartRecording();
@@ -91,6 +91,7 @@ namespace DemoRecorder
         {
             DebugPrint("Round started");
             _isRecordingForbidden = false;
+            // check if we should start recording
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
                 StartRecording();
@@ -108,14 +109,11 @@ namespace DemoRecorder
                 return HookResult.Continue;
             }
             DebugPrint($"Player {player.PlayerName} connected");
-            // delay a frame to not interfere with connection state of player
-            Server.NextFrame(() =>
+            // check if we should start recording
+            if (EnoughPlayersConnected() && CheckForWarmup())
             {
-                if (EnoughPlayersConnected() && CheckForWarmup())
-                {
-                    StartRecording();
-                }
-            });
+                StartRecording();
+            }
             return HookResult.Continue;
         }
 
@@ -152,6 +150,7 @@ namespace DemoRecorder
         {
             DebugPrint("New match started");
             _isRecordingForbidden = false;
+            // check if we should start recording
             if (EnoughPlayersConnected() && CheckForWarmup())
             {
                 StartRecording();
@@ -171,7 +170,6 @@ namespace DemoRecorder
             DebugPrint($"Map started: {mapName}");
             Config.Reload();
             _isRecordingForbidden = false;
-            EnableHLTV();
         }
 
         private void OnMapEnd()
@@ -218,9 +216,19 @@ namespace DemoRecorder
                 return;
             }
             _isRecording = true;
-            string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
-            Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1".Replace("//", "/"));
-            DebugPrint($"Recording started: {demoName}");
+            // delay setting commands to avoid interference with internal cs2 logic (commands take a tick to be executed)
+            Server.NextFrame(() =>
+            {
+                // enable HLTV before recording (because on map start may not work due to hibernation enabled)
+                EnableHLTV();
+                // delay demo recording a frame further
+                Server.NextFrame(() =>
+                {
+                    string demoName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + "-" + Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture) + ".dem";
+                    Server.ExecuteCommand($"tv_record \"{Config.DemoFolder}/{demoName}\" -instance 1".Replace("//", "/"));
+                    DebugPrint($"Recording started: {demoName}");
+                });
+            });
         }
 
         private void StopRecording()
@@ -239,14 +247,14 @@ namespace DemoRecorder
         private void EnableHLTV()
         {
             DebugPrint("Enabling HLTV");
-            Server.ExecuteCommand($"tv_enable true");
+            Server.ExecuteCommand($"tv_enable 1");
             Server.ExecuteCommand($"tv_record_immediate 1");
         }
 
         private void DisableHLTV()
         {
             DebugPrint("Disabling HLTV");
-            Server.ExecuteCommand($"tv_enable false");
+            Server.ExecuteCommand($"tv_enable 0");
         }
     }
 }
